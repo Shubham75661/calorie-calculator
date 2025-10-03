@@ -1,0 +1,6 @@
+fastapi[standard]
+uvicorn
+requests
+python-dotenv
+fuzzywuzzy 
+python-Levenshtein
