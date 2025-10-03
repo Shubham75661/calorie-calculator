@@ -1,6 +1,6 @@
 from fuzzywuzzy import fuzz
 
-def fuzz_search(word, wordList, compareElement="description"):
+def fuzz_search(word : str, wordList : list, compareElement : str ="description", threshold : int = 60):
     grade = 0
     match = None
 
@@ -9,5 +9,7 @@ def fuzz_search(word, wordList, compareElement="description"):
         if score > grade:
             grade = score
             match = element
-    
-    return [grade, match]
+
+    if grade >= threshold:
+        return grade, match
+    return 0, None
