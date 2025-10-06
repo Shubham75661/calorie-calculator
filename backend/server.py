@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Depends, Body
+from fastapi import FastAPI, HTTPException, Depends, Body, Request
+from fastapi.responses import JSONResponse
 from models.calorie_request import CalorieRequest
 from services.USDA_service import USDA_service
 from utils.constants import MATCH_THRESHOLD
@@ -10,6 +11,9 @@ from services.security_service import SecurityService
 from database import get_db, Base, engine
 from middleware.auth_middleware import verify_jwt_token
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
  
 app = FastAPI()
 origins = [
@@ -17,19 +21,33 @@ origins = [
     "http://127.0.0.1:3000"
 ]
 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,  # needed for cookies / auth headers
-    allow_methods=["*"],     # allow all HTTP methods
-    allow_headers=["*"],     # allow all headers (like Content-Type)
+    allow_credentials=True,  
+    allow_methods=["*"],    
+    allow_headers=["*"],     
 )
 app.middleware("http")(verify_jwt_token)
 security_service = SecurityService()
 Base.metadata.create_all(bind=engine)
 
-@app.post("/getcalories")
-def get_calories(req: CalorieRequest):
+async def custom_rate_limit_exceeded_handler(request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Please try again later."}
+    )
+
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_exceeded_handler)
+
+@app.post("/get-calories")
+@limiter.limit("15/minute")
+def get_calories(req: CalorieRequest, request : Request):
     try:
         USDA = USDA_service()
         foods = USDA.search_food(req.dish_name)
@@ -80,7 +98,6 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 @app.post("/refresh")
 def refresh_token(refresh_data: dict = Body(...), db: Session = Depends(get_db)):
     refresh_token = refresh_data.get("refreshToken")
-    print("token", refresh_token)
     if not refresh_token:
         raise HTTPException(status_code=400, detail="Refresh token required")
     user_service = UserService(db, security_service)

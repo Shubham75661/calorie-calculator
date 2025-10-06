@@ -1,18 +1,13 @@
 "use client"
-import { useState } from "react";
-// new_user = User(
-//             first_name=user_data.first_name,
-//             last_name=user_data.last_name,
-//             email=user_data.email,
-//             hashed_password=hashed_password,
-//             refresh_token = refreshToken
-//         )
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 export default function register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [first_name, setfirst_name] = useState("");
     const [last_name, setLast_name] = useState("");
-    
+    let router = useRouter()
 
     async function handleRegister(e: React.FormEvent) {
         e.preventDefault();
@@ -29,32 +24,27 @@ export default function register() {
             alert(data.detail || "Login failed");
             return;
         }
-
-        console.log("Printing register Data :- ",data)
-
-        // ✅ Store tokens in localStorage
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-
-        alert("Login successful!");
+        alert("Registration successful!");
+        router.push("/login")
     }
 
   return (
-    <div className="flex h-screen flex-col justify-center gap-2">
-      <blockquote className="text-center text-2xl font-semibold text-gray-900 italic dark:text-white mb-7">
+    <div className="flex pt-10 flex-col justify-center">
+      {/* <blockquote className="text-center text-2xl font-semibold text-gray-900 italic dark:text-white mb-7">
       CALORIE {" "}
         <span className="relative inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-blue-400">
           <span className="relative text-white dark:text-gray-950">CALCULATOR</span>
         </span>
-      </blockquote>
-      <div className="flex flex-col gap-6 self-center rounded-sm bg-white px-7 pt-7 border-1 rounderd-md">
+      </blockquote> */}
+      <h3 className="flex-1 pt-2 pb-2 text-md md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-center">MealMind</h3>
+      <div className="flex flex-col gap-2 self-center rounded-sm bg-white dark:bg-gray-800 px-7 border-1 rounderd-md shadow-2xl p-3">
         <div className="flex flex-col gap-1">
           <label className="font-mono"> First Name </label>
           <input 
             type="text" 
             id="first_name" 
             name="first_name" 
-            placeholder="first_name" 
+            placeholder="first name" 
             value={first_name}
             onChange={(e) => setfirst_name(e.target.value)}
             className="rounded-b-md border-2 bg-gray-100 p-2 text-black" 
@@ -66,7 +56,7 @@ export default function register() {
             type="text" 
             id="last_name" 
             name="last_name" 
-            placeholder="last_name" 
+            placeholder="last name" 
             value={last_name}
             onChange={(e) => setLast_name(e.target.value)}
             className="rounded-b-md border-2 bg-gray-100 p-2 text-black" 
@@ -98,7 +88,7 @@ export default function register() {
         </div>
         <div className="flex">
           <button 
-            className="flex-1 font-mono rounded-sm bg-blue-400 p-2"
+            className="flex-1 font-mono rounded-sm bg-green-500 p-2"
             onClick={handleRegister}
             >Register</button>
         </div>

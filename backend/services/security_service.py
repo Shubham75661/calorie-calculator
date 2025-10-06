@@ -15,10 +15,6 @@ class SecurityService:
         self.REFRESH_TOKEN_EXPIRE_TIME = 7
 
     def _truncate_password(self, password: str) -> bytes:
-        """
-        Truncate password to 72 bytes for bcrypt.
-        Returns bytes to ensure exact byte length control.
-        """
         password_bytes = password.encode("utf-8")
         
         if len(password_bytes) <= 72:
@@ -70,7 +66,7 @@ class SecurityService:
     def createAccessToken(self, email : str)-> str:
         payload = {
             "sub" : email,
-            "exp" : datetime.utcnow() + timedelta(seconds=self.ACCESS_TOKEN_EXPIRE_TIME),
+            "exp" : datetime.utcnow() + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_TIME),
             "type" : "access"
         }
 

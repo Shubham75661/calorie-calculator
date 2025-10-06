@@ -1,7 +1,14 @@
 "use client"
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {motion} from "framer-motion"
+import {lazy, Suspense} from "react"
+import Loader from "@/components/loader";
 
+
+
+const ShowData = lazy(() => import("@/components/showData"))
 interface CalorieResponse {
     dish_name: string;
     servings: number;
@@ -69,15 +76,16 @@ export default function Meal(){
     const [servings, setServings] = useState(1);
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
+    const [isLoading, setisLoading] = useState(false)
     const [calorieData, setCalorieData] = useState<CalorieResponse | null>(null);
 
     async function fetchCalories(e: React.FormEvent) {
         e.preventDefault();
         setError("");
         setResult(null);
-
+        setisLoading(true)
         try {
-            const res = await fetchWithAuth("http://localhost:8000/getcalories", {
+            const res = await fetchWithAuth("http://localhost:8000/get-calories", {
                 method: "POST",
                 body: JSON.stringify({
                     dish_name: dishName,
@@ -95,20 +103,25 @@ export default function Meal(){
 
         } catch (err: any) {
             setError(err.message);
+            // router.push("/login")
         }
+        setisLoading(false)
     }
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-4 shadow-md rounded-lg bg-white">
+        <div className="max-w-md mx-auto h-max max-h-max mt-10 p-4 shadow-md rounded-lg bg-white dark:bg-gray-800 justify-center items-center border-1">
+        {isLoading && (
+            <Loader/>
+        )}
         <h2 className="text-2xl font-semibold mb-4 text-center">🍽 Get Calories</h2>
-        <form onSubmit={fetchCalories} className="flex flex-col gap-4">
+        <form onSubmit={fetchCalories} className="flex flex-col gap-4 ">
             <input
-            type="text"
-            placeholder="Enter dish name (e.g. pizza)"
-            value={dishName}
-            onChange={(e) => setDishName(e.target.value)}
-            className="border p-2 rounded"
-            required
+                type="text"
+                placeholder="Enter dish name (e.g. pizza)"
+                value={dishName}
+                onChange={(e) => setDishName(e.target.value)}
+                className="border p-2 rounded"
+                required
             />
             <input
                 type="number"
@@ -128,10 +141,10 @@ export default function Meal(){
 
         {error && <p className="text-red-600 mt-4">{error}</p>}
         {calorieData && (
-            <div>
-                <p>Dish: {calorieData.dish_name}</p>
-                <p>Calories per serving: {calorieData.calories_per_serving}</p>
-                <p>Total calories: {calorieData.total_calories}</p>
+            <div className="pt-4 flex flex-row justify-evenly">
+                <ShowData location = "calories" value={calorieData.dish_name} title = "Dish Name"></ShowData>
+                <ShowData location = "food" value={calorieData.calories_per_serving} title = "Per Serving"></ShowData>
+                <ShowData location = "foodTotal" value={calorieData.total_calories} title = "Total Calories"></ShowData>
             </div>
         )}
         </div>
