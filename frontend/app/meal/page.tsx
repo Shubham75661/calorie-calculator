@@ -109,7 +109,7 @@ export default function Meal(){
     }
 
     return (
-        <div className="max-w-md mx-auto h-max max-h-max mt-10 p-4 shadow-md rounded-lg bg-white dark:bg-gray-800 justify-center items-center border-1">
+        <div className="max-w-md mx-auto h-max max-h-max mt-10 p-4 shadow-md rounded-lg bg-white dark:bg-gray-700 justify-center items-center border-1">
         {isLoading && (
             <Loader/>
         )}

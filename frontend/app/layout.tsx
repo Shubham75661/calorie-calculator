@@ -41,7 +41,9 @@ export default function RootLayout({
         >
           {pathname !== "/" && (
             <div className="flex flex-row items-end">
-              {/* <h3 className="flex-1 pt-2 text-md md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-center">MealMind</h3> */}
+              {
+                pathname == "/meal"  && <h3 className="flex-1 pt-2 text-md md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-center">MealMind</h3>
+              }
               <div className="pt-2 pl-2">
                 <ModeToggle />
               </div>
