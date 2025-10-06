@@ -4,3 +4,8 @@ requests
 python-dotenv
 fuzzywuzzy 
 python-Levenshtein
+bcrypt==4.0.1
+pyjwt
+sqlalchemy 
+psycopg2-binary 
+email-validator
