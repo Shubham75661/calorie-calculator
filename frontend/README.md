@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥗 MealMind
 
-## Getting Started
+MealMind is a calorie-tracking web app built with **FastAPI** and **Next.js**. It uses the USDA FoodData Central API to fetch nutritional data, enhanced by fuzzy search for flexible dish name matching. The app features secure JWT-based authentication with PostgreSQL and a responsive UI with light/dark theme support.
 
-First, run the development server:
+---
 
+## 🚀 Features
+
+- 🍎 **Calorie Lookup**: Search foods with fuzzy search for typo-tolerant dish matching (e.g., "aple" → "apple").
+- 🔐 **User Authentication**: Secure registration and login with JWT access and refresh tokens.
+- 🌗 **Theme Toggle**: Switch between light and dark modes (hidden on homepage).
+- 🛡️ **Rate Limiting**: Protects endpoints (`/login`, `/register`, `/getcalories`) from abuse.
+- 📱 **Responsive Design**: Optimized for desktop and mobile devices.
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/meal-mind.git
+cd meal-mind
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2️⃣ Backend Setup
+- **Navigate to Backend**:
+  ```bash
+  cd backend
+  ```
+- **Create Virtual Environment**:
+  ```bash
+  python -m venv venv
+  source venv/bin/activate  # On Windows: venv\Scripts\activate
+  ```
+- **Install Dependencies**:
+  ```bash
+  pip install fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv slowapi fuzzywuzzy
+  ```
+- **Set Up PostgreSQL**:
+  - Install PostgreSQL and ensure it’s running.
+  - Create the `calorie_auth` database:
+    ```sql
+    CREATE DATABASE calorie_auth;
+    ```
+- **Configure Environment Variables**:
+  - Create a `.env` file in the `backend` directory:
+    ```env
+    USDA_API_KEY=your-usda-api-key
+    DATABASE_URL=postgresql://postgres:your-password@localhost:5432/calorie_auth
+    JWT_SECRET=your-secret-key
+    ACCESS_TOKEN_EXPIRE_MINUTES=30
+    REFRESH_TOKEN_EXPIRE_DAYS=7
+    ```
+  - Obtain a USDA API key from [USDA FoodData Central](https://fdc.nal.usda.gov/api-key-signup.html).
+  - Replace `your-password` with your PostgreSQL password and `your-secret-key` with a secure JWT secret.
+  - **Note**: Do not commit `.env` to version control.
+- **Run the Backend**:
+  ```bash
+  uvicorn server:app --reload
+  ```
+  - API runs at `http://localhost:8000`. Docs at `http://localhost:8000/docs`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3️⃣ Frontend Setup
+- **Navigate to Frontend**:
+  ```bash
+  cd ../frontend
+  ```
+- **Install Dependencies**:
+  ```bash
+  npm install
+  ```
+  or
+  ```bash
+  yarn install
+  ```
+- **Run the Frontend**:
+  ```bash
+  npm run dev
+  ```
+  or
+  ```bash
+  yarn dev
+  ```
+  - App runs at `http://localhost:3000`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Usage
 
-To learn more about Next.js, take a look at the following resources:
+- **Homepage (`/`)**: Landing page without theme toggle, redirects to `/login` or `/register`.
+- **Register (`/register`)**: Create an account with first name, last name, email, and password.
+- **Login (`/login`)**: Sign in to access calorie tracking.
+- **Calorie Tracking**: Use `/meal` to search foods and view calorie data.
+- **Theme Toggle**: Switch themes on `/register`, `/login`, and other pages.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌐 API Endpoints
 
-## Deploy on Vercel
+- **POST `/register`**: Create a new user (Rate Limit: 3/minute)
+  - Body: `{ "first_name": string, "last_name": string, "email": string, "password": string }`
+- **POST `/login`**: Authenticate and get JWT tokens (Rate Limit: 5/minute)
+  - Body: `{ "email": string, "password": string }`
+- **POST `/get-calories`**: Get calorie info for a dish (Rate Limit: 10/minute)
+  - Body: `{ "dish_name": string, "servings": number }`
+- **POST `/refresh`**: Refresh access token
+  - Body: `{ "refreshToken": string }`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 Environment Variables
+
+- **Backend (.env)**:
+  | Variable                     | Description                              | Example Value                              |
+  |------------------------------|------------------------------------------|--------------------------------------------|
+  | `USDA_API_KEY`              | USDA API key                            | Obtain from [USDA](https://fdc.nal.usda.gov/api-key-signup.html) |
+  | `DATABASE_URL`              | PostgreSQL connection string            | `postgresql://postgres:admin@localhost:5432/calorie_auth` |
+  | `JWT_SECRET`                | JWT signing key                         | `your-secret-key`                          |
+  | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiry (minutes)         | `30`                                       |
+  | `REFRESH_TOKEN_EXPIRE_DAYS`  | Refresh token expiry (days)            | `7`                                        |
+
+- **Frontend**: No `.env` required. API calls target `http://localhost:8000`.
+
+---
+
+## 📝 Notes
+
+- **Fuzzy Search**: Uses `fuzzywuzzy` to match dish names, enabling robust searches despite typos.
+- **Database**: Users must manually create the `calorie_auth` database and `users` table.
+- **Security**: Use a strong `JWT_SECRET` in production. Keep `.env` private.
+- **Dark Mode**: Tailwind’s `dark:` classes ensure UI adapts to light/dark themes.
+
+---
+
+## 🐛 Troubleshooting
+
+- **Backend**:
+  - **Database Issues**: Verify PostgreSQL is running and `DATABASE_URL` is correct.
+  - **USDA API Errors**: Ensure `USDA_API_KEY` is valid.
+  - **429 Errors**: Rate limit exceeded; wait or adjust limits in `server.py`.
+- **Frontend**:
+  - Ensure backend is running at `http://localhost:8000`.
+  - Check CORS in `server.py` if API calls fail.
+  - Verify dark mode styling with `dark:` classes.
+
+---
+
+## 🤝 Contributing
+
+Fork the repo, create a feature branch, and submit a pull request.
+
+---
